@@ -4,17 +4,32 @@ namespace DirectoryService.Domain.ValueObjects;
 
 public record Address
 {
-    public string Value { get; }
+    public string Country { get; }
 
-    private Address(string value)
+    public string City { get; }
+
+    public string Street { get; }
+
+    public string HouseNumber { get; }
+
+    private Address(
+        string country,
+        string city,
+        string street,
+        string houseNumber)
     {
-        Value = value;
+        Country = country;
+        City = city;
+        Street = street;
+        HouseNumber = houseNumber;
     }
 
-    public static Result<Address> Create(string value)
+    public static Result<Address> Create(
+        string country,
+        string city,
+        string street,
+        string houseNumber)
     {
-        return string.IsNullOrWhiteSpace(value) ?
-            Result.Failure<Address>("Адрес невалидный") :
-            new Address(value);
+        return new Address(country, city, street, houseNumber);
     }
 }
