@@ -9,6 +9,11 @@ public class Department
     private List<DepartmentLocation> _departmentLocations = [];
     private List<DepartmentPosition> _departmentPositions = [];
 
+    // EF Core
+    private Department()
+    {
+    }
+
     private Department(
         NameDepartment name,
         Identifier identifier,
@@ -29,9 +34,9 @@ public class Department
 
     public Guid Id { get; private set; }
 
-    public NameDepartment Name { get; private set; }
+    public NameDepartment Name { get; private set; } = null!;
 
-    public Identifier Identifier { get; private set; }
+    public Identifier Identifier { get; private set; } = null!;
 
     public Guid? ParentId { get; private set; }
 
@@ -41,7 +46,7 @@ public class Department
 
     public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
 
-    public Path Path { get;  private set; }
+    public Path Path { get;  private set; } = null!;
 
     public short Depth { get;  private set; }
 

@@ -8,7 +8,12 @@ public class Location
 {
     private List<DepartmentLocation> _departmentLocations = [];
 
-    public Location(
+    // EF Core
+    private Location()
+    {
+    }
+
+    private Location(
         NameLocation name,
         Address address,
         TimeZone timeZone)
@@ -24,11 +29,11 @@ public class Location
 
     public Guid Id { get; private set; }
 
-    public NameLocation Name { get; private set; }
+    public NameLocation Name { get; private set; } = null!;
 
-    public Address Address { get; private set; }
+    public Address Address { get; private set; } = null!;
 
-    public TimeZone TimeZone { get; private set; }
+    public TimeZone TimeZone { get; private set; } = null!;
 
     public bool IsActive { get; private set; }
 
