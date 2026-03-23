@@ -1,8 +1,12 @@
+using DirectoryService.Infrastructure.Postgres;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
 builder.Services.AddOpenApi();
+
+builder.Services.AddDirectoryService(builder.Configuration);
 
 WebApplication app = builder.Build();
 
