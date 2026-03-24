@@ -1,4 +1,5 @@
-﻿using DirectoryService.Domain.Departments;
+﻿using DirectoryService.Application.Locations;
+using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 
 namespace DirectoryService.Infrastructure.Postgres;
@@ -9,6 +10,8 @@ public class DirectoryServiceDbContext : DbContext
     : base(options)
     {
     }
+
+    public DbSet<Location> Locations => Set<Location>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

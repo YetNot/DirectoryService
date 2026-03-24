@@ -8,12 +8,7 @@ public class Location
 {
     private List<DepartmentLocation> _departmentLocations = [];
 
-    // EF Core
-    private Location()
-    {
-    }
-
-    private Location(
+    public Location(
         NameLocation name,
         Address address,
         TimeZone timeZone)
@@ -25,6 +20,11 @@ public class Location
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
+    }
+
+    // EF Core
+    private Location()
+    {
     }
 
     public Guid Id { get; private set; }

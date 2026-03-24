@@ -1,4 +1,7 @@
+using DirectoryService.Application;
+using DirectoryService.Application.Locations;
 using DirectoryService.Infrastructure.Postgres;
+using DirectoryService.Infrastructure.Postgres.Locations;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +9,11 @@ builder.Services.AddControllers();
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddDirectoryService(builder.Configuration);
+builder.Services.AddInfrastructurePostgres(builder.Configuration);
+
+builder.Services.AddScoped<ILocationsRepository, LocationsRepository>();
+
+builder.Services.AddApplication();
 
 WebApplication app = builder.Build();
 
