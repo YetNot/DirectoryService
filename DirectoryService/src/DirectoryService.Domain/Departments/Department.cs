@@ -9,12 +9,7 @@ public class Department
     private List<DepartmentLocation> _departmentLocations = [];
     private List<DepartmentPosition> _departmentPositions = [];
 
-    // EF Core
-    private Department()
-    {
-    }
-
-    private Department(
+    public Department(
         NameDepartment name,
         Identifier identifier,
         Guid? parentId,
@@ -30,6 +25,11 @@ public class Department
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
+    }
+
+    // EF Core
+    private Department()
+    {
     }
 
     public Guid Id { get; private set; }

@@ -14,7 +14,7 @@ public record TimeZone
     public static Result<TimeZone> Create(string value)
     {
         return string.IsNullOrWhiteSpace(value) ?
-            Result.Failure<TimeZone>("Временю зона невалидная") :
+            Result.Failure<TimeZone>("Временая зона невалидная") :
             new TimeZone(value);
     }
 }

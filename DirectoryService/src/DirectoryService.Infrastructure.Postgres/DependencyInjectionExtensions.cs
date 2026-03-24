@@ -8,7 +8,7 @@ namespace DirectoryService.Infrastructure.Postgres;
 
 public static class DependencyInjectionExtensions
 {
-    public static IServiceCollection AddDirectoryService(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructurePostgres(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<DirectoryServiceDbContext>((sp, options) =>
         {
