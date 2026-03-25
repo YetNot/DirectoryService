@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using SharedKernel;
 
 namespace DirectoryService.Domain.ValueObjects;
 
@@ -11,10 +12,10 @@ public record Path
         Value = value;
     }
 
-    public static Result<Path> Create(string value)
+    public static Result<Path, Error> Create(string value)
     {
         return string.IsNullOrWhiteSpace(value) ?
-            Result.Failure<Path>("Денорм. путь невалидный") :
+            GeneralErrors.ValueIsRequired("Путь") :
             new Path(value);
     }
 }

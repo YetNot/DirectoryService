@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using SharedKernel;
 
 namespace DirectoryService.Domain.ValueObjects;
 
@@ -15,12 +16,23 @@ public record NameDepartment
         Value = value;
     }
 
-    public static Result<NameDepartment> Create(string value)
+    public static Result<NameDepartment, Errors> Create(string value)
     {
-        if (string.IsNullOrWhiteSpace(value)
-            || (value.Length <= MIN_LENGTH || value.Length >= MAX_LENGTH))
+        List<Error> errors = [];
+
+        if (string.IsNullOrWhiteSpace(value))
         {
-            return Result.Failure<NameDepartment>("Имя отделения невалидное");
+            errors.Add(GeneralErrors.ValueIsRequired("Название отделения"));
+        }
+
+        if (value.Length <= MIN_LENGTH || value.Length >= MAX_LENGTH)
+        {
+            errors.Add(GeneralErrors.ValueIsInvalid("Название отделения"));
+        }
+
+        if (errors.Count > 0)
+        {
+            return new Errors(errors);
         }
 
         return new NameDepartment(value);

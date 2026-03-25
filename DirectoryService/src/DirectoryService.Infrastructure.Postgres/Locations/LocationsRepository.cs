@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.Locations;
 using DirectoryService.Domain.Locations;
+using SharedKernel;
 
 namespace DirectoryService.Infrastructure.Postgres.Locations;
 
@@ -13,7 +14,7 @@ public class LocationsRepository : ILocationsRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Result<Guid>> AddAsync(Location location, CancellationToken cancellationToken = default)
+    public async Task<Result<Guid, Error>> AddAsync(Location location, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -21,11 +22,11 @@ public class LocationsRepository : ILocationsRepository
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return Result.Success(location.Id);
+            return Result.Success<Guid, Error>(location.Id);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return Result.Failure<Guid>(ex.Message);
+            return Result.Failure<Guid, Error>(GeneralErrors.Failure());
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using SharedKernel;
 
 namespace DirectoryService.Domain.ValueObjects;
 
@@ -15,13 +16,28 @@ public record Identifier
         Value = value;
     }
 
-    public static Result<Identifier> Create(string value)
+    public static Result<Identifier, Errors> Create(string value)
     {
-        if (!value.All(c => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
-            || (string.IsNullOrWhiteSpace(value)
-                || (value.Length <= MIN_LENGTH || value.Length >= MAX_LENGTH)))
+        List<Error> errors = [];
+
+        if (string.IsNullOrWhiteSpace(value))
         {
-            return Result.Failure<Identifier>("Идентификатор невалидный");
+            errors.Add(GeneralErrors.ValueIsRequired("Идентификатор"));
+        }
+
+        if (!value.All(c => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+        {
+            errors.Add(GeneralErrors.ValueIsInvalid("Идентификатор"));
+        }
+
+        if (value.Length <= MIN_LENGTH || value.Length >= MAX_LENGTH)
+        {
+            errors.Add(GeneralErrors.ValueIsInvalid("Идентификатор"));
+        }
+
+        if (errors.Count > 0)
+        {
+            return new Errors(errors);
         }
 
         return new Identifier(value);

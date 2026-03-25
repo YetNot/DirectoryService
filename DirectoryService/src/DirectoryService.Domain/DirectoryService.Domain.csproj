@@ -2,4 +2,7 @@
   <ItemGroup>
     <PackageReference Include="CSharpFunctionalExtensions" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
+  </ItemGroup>
 </Project>
