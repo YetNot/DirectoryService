@@ -1,22 +1,57 @@
-﻿using DirectoryService.Domain.ValueObjects;
-using Path = DirectoryService.Domain.ValueObjects.Path;
+﻿using CSharpFunctionalExtensions;
+using DirectoryService.Domain.DepartmentLocations;
+using DirectoryService.Domain.DepartmentPositions;
+using SharedKernel;
 
 namespace DirectoryService.Domain.Departments;
 
-public class Department
+public sealed class Department
 {
-    private List<Department> _children = [];
-    private List<DepartmentLocation> _departmentLocations = [];
-    private List<DepartmentPosition> _departmentPositions = [];
+    private readonly List<Department> _childrenDepartments = [];
+    private readonly List<DepartmentLocation> _departmentLocations = [];
+    private readonly List<DepartmentPosition> _departmentPositions = [];
 
-    public Department(
-        NameDepartment name,
-        Identifier identifier,
-        Guid? parentId,
-        Path path,
-        short depth)
+    // EF Core
+    private Department()
     {
-        Id = Guid.NewGuid();
+    }
+
+    public DepartmentId Id { get; private set; } = null!;
+
+    public DepartmentName Name { get; private set; } = null!;
+
+    public Identifier Identifier { get; private set; } = null!;
+
+    public DepartmentId? ParentId { get; private set; }
+
+    public Path Path { get;  private set; } = null!;
+
+    public int Depth { get;  private set; }
+
+    public int ChildrenCount { get; private set; }
+
+    public bool IsActive { get;  private set; }
+
+    public DateTime CreatedAt { get; private set; }
+
+    public DateTime UpdatedAt { get; private set; }
+
+    public IReadOnlyList<Department> ChildrenDepartments => _childrenDepartments;
+
+    public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
+
+    public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
+
+    private Department(
+        DepartmentId id,
+        DepartmentName name,
+        Identifier identifier,
+        DepartmentId parentId,
+        Path path,
+        int depth,
+        IEnumerable<DepartmentLocation> departmentLocations)
+    {
+        Id = id;
         Name = name;
         Identifier = identifier;
         ParentId = parentId;
@@ -24,35 +59,58 @@ public class Department
         Depth = depth;
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
-        UpdatedAt = CreatedAt;
+        UpdatedAt = DateTime.UtcNow;
+        _departmentLocations = departmentLocations.ToList();
     }
 
-    // EF Core
-    private Department()
+    public static Result<Department, Error> CreateParent(
+        DepartmentName name,
+        Identifier identifier,
+        IEnumerable<DepartmentLocation> departmentLocations,
+        DepartmentId? departmentId = null)
     {
+        var departmentLocationsList = departmentLocations.ToList();
+
+        if (departmentLocationsList.Count == 0)
+        {
+            return Error.Validation("department.location", "Department locations must contain at least one location");
+        }
+
+        var path = Path.CreateParent(identifier);
+
+        return new Department(
+            departmentId ?? new DepartmentId(Guid.NewGuid()),
+            name,
+            identifier,
+            departmentId ?? new DepartmentId(Guid.NewGuid()),
+            path,
+            0,
+            departmentLocationsList);
     }
 
-    public Guid Id { get; private set; }
+    public static Result<Department, Error> CreateChild(
+        DepartmentName name,
+        Identifier identifier,
+        Department parent,
+        IEnumerable<DepartmentLocation> departmentLocations,
+        DepartmentId? departmentId = null)
+    {
+        var departmentLocationsList = departmentLocations.ToList();
 
-    public NameDepartment Name { get; private set; } = null!;
+        if (departmentLocationsList.Count == 0)
+        {
+            return Error.Validation("department.location", "Department locations must contain at least one location");
+        }
 
-    public Identifier Identifier { get; private set; } = null!;
+        Path path = parent.Path.CreateChild(identifier);
 
-    public Guid? ParentId { get; private set; }
-
-    public IReadOnlyList<Department> Children => _children;
-
-    public IReadOnlyList<DepartmentLocation> DepartmentLocations => _departmentLocations;
-
-    public IReadOnlyList<DepartmentPosition> DepartmentPositions => _departmentPositions;
-
-    public Path Path { get;  private set; } = null!;
-
-    public short Depth { get;  private set; }
-
-    public bool IsActive { get;  private set; }
-
-    public DateTime CreatedAt { get; private set; }
-
-    public DateTime UpdatedAt { get; private set; }
+        return new Department(
+            departmentId ?? new DepartmentId(Guid.NewGuid()),
+            name,
+            identifier,
+            departmentId ?? new DepartmentId(Guid.NewGuid()),
+            path,
+            parent.Depth + 1,
+            departmentLocationsList);
+    }
 }

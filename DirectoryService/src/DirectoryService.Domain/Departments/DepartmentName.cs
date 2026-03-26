@@ -1,22 +1,22 @@
 ﻿using CSharpFunctionalExtensions;
 using SharedKernel;
 
-namespace DirectoryService.Domain.ValueObjects;
+namespace DirectoryService.Domain.Departments;
 
-public record NameDepartment
+public sealed record DepartmentName
 {
-    public const int MIN_LENGTH = 3;
+    public const int NAME_MIN_LENGTH = 3;
 
-    public const int MAX_LENGTH = 150;
+    public const int NAME_MAX_LENGTH = 150;
 
     public string Value { get; }
 
-    private NameDepartment(string value)
+    private DepartmentName(string value)
     {
         Value = value;
     }
 
-    public static Result<NameDepartment, Errors> Create(string value)
+    public static Result<DepartmentName, Errors> Create(string value)
     {
         List<Error> errors = [];
 
@@ -25,7 +25,7 @@ public record NameDepartment
             errors.Add(GeneralErrors.ValueIsRequired("Название отделения"));
         }
 
-        if (value.Length <= MIN_LENGTH || value.Length >= MAX_LENGTH)
+        if (value.Length is < NAME_MIN_LENGTH or > NAME_MAX_LENGTH)
         {
             errors.Add(GeneralErrors.ValueIsInvalid("Название отделения"));
         }
@@ -35,6 +35,6 @@ public record NameDepartment
             return new Errors(errors);
         }
 
-        return new NameDepartment(value);
+        return new DepartmentName(value);
     }
 }

@@ -1,4 +1,5 @@
-﻿using DirectoryService.Domain.Departments;
+﻿using DirectoryService.Domain.DepartmentLocations;
+using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -11,36 +12,28 @@ public class DepartmentLocationConfiguration : IEntityTypeConfiguration<Departme
     {
         builder.ToTable("department_locations");
 
-        builder.HasKey(x => x.DepartmentLocationId)
+        builder.HasKey(x => x.Id)
             .HasName("pk_department_locations");
 
-        builder.Property(x => x.DepartmentLocationId)
-            .HasColumnName("department_location_id");
+        builder.Property(x => x.Id)
+            .IsRequired()
+            .HasColumnName("department_location_id")
+            .HasConversion(
+                value => value.Value,
+                value => new DepartmentLocationId(value));
 
         builder.Property(x => x.DepartmentId)
-            .HasColumnName("department_id");
+            .IsRequired()
+            .HasColumnName("department_id")
+            .HasConversion(
+                value => value.Value,
+                value => new DepartmentId(value));
 
         builder.Property(x => x.LocationId)
-            .HasColumnName("location_id");
-
-        builder
-            .HasOne<Department>()
-            .WithMany(l => l.DepartmentLocations)
-            .HasForeignKey(x => x.DepartmentId)
-            .HasConstraintName("fk_department_locations_departments")
             .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder
-            .HasOne<Location>()
-            .WithMany(l => l.DepartmentLocations)
-            .HasForeignKey(x => x.LocationId)
-            .HasConstraintName("fk_department_locations_locations")
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasIndex(x => new { x.LocationId, x.DepartmentId })
-            .IsUnique()
-            .HasDatabaseName("ux_department_locations_location_id_department_id");
+            .HasColumnName("location_id")
+            .HasConversion(
+                value => value.Value,
+                value => new LocationId(value));
     }
 }

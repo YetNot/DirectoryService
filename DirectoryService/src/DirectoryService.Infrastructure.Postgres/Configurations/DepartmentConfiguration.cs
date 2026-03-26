@@ -1,5 +1,4 @@
 ﻿using DirectoryService.Domain.Departments;
-using DirectoryService.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,61 +14,77 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .HasName("pk_departments");
 
         builder.Property(x => x.Id)
-            .HasColumnName("department_id");
-
-        builder.Property(x => x.Name)
+            .IsRequired()
+            .HasColumnName("id")
             .HasConversion(
-                v => v.Value,
-                v => NameDepartment.Create(v).Value)
-            .HasMaxLength(150)
-            .HasColumnName("name")
-            .IsRequired();
+                value => value.Value,
+                value => new DepartmentId(value));
 
-        builder.Property(x => x.Identifier)
-            .HasConversion(
-                v => v.Value,
-                v => Identifier.Create(v).Value)
-            .HasMaxLength(150)
-            .HasColumnName("identifier")
-            .IsRequired();
+        builder.ComplexProperty(x => x.Name, nb =>
+        {
+            nb.Property(n => n.Value)
+                .HasColumnName("name")
+                .HasMaxLength(DepartmentName.NAME_MAX_LENGTH)
+                .IsRequired();
+        });
+
+        builder.ComplexProperty(x => x.Identifier, nb =>
+        {
+            nb.Property(n => n.Value)
+                .HasColumnName("identifier")
+                .HasMaxLength(Identifier.IDENTIFIER_MAX_LENGTH)
+                .IsRequired();
+        });
 
         builder.Property(x => x.ParentId)
             .IsRequired(false)
-            .HasColumnName("parent_id");
+            .HasColumnName("parent_id")
+            .HasConversion(
+                value => value!.Value,
+                value => new DepartmentId(value));
 
-        builder.ComplexProperty(x => x.Path, a =>
+        builder.ComplexProperty(x => x.Path, nb =>
         {
-            a.Property(x => x.Value)
+            nb.Property(n => n.Value)
                 .HasColumnName("path")
                 .IsRequired();
         });
 
         builder.Property(x => x.Depth)
-            .HasColumnName("depth")
-            .IsRequired();
+            .IsRequired()
+            .HasColumnName("depth");
+
+        builder.Property(x => x.ChildrenCount)
+            .IsRequired()
+            .HasColumnName("children_count");
 
         builder.Property(x => x.IsActive)
-            .HasDefaultValue(true)
-            .HasColumnName("is_active")
-            .IsRequired();
+            .IsRequired()
+            .HasColumnName("is_active");
 
         builder.Property(x => x.CreatedAt)
-            .HasDefaultValueSql("now()")
-            .HasColumnName("created_at")
-            .IsRequired();
+            .IsRequired()
+            .HasColumnName("created_at");
 
         builder.Property(x => x.UpdatedAt)
-            .HasDefaultValueSql("now()")
-            .HasColumnName("updated_at")
-            .IsRequired();
+            .IsRequired()
+            .HasColumnName("updated_at");
 
-        builder
-            .HasOne<Department>()
-            .WithMany(x => x.Children)
+        builder.HasMany(x => x.ChildrenDepartments)
+            .WithOne()
+            .IsRequired(false)
             .HasForeignKey(x => x.ParentId)
-            .HasConstraintName("fk_departments_parent_departments");
+            .HasConstraintName("fk_children_departments")
+            .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(x => x.ParentId)
-            .HasDatabaseName("ix_departments_parent_parent_id");
+        builder.HasMany(x => x.DepartmentLocations)
+            .WithOne()
+            .HasForeignKey(x => x.DepartmentId)
+            .HasConstraintName("fk_department_locations");
+
+        builder.HasMany(x => x.DepartmentPositions)
+            .WithOne()
+            .HasForeignKey(x => x.DepartmentId)
+            .HasConstraintName("fk_department_positions");
     }
 }

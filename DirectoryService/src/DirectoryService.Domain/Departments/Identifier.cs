@@ -1,13 +1,15 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System.Text.RegularExpressions;
+using CSharpFunctionalExtensions;
 using SharedKernel;
 
-namespace DirectoryService.Domain.ValueObjects;
+namespace DirectoryService.Domain.Departments;
 
-public record Identifier
+public sealed record Identifier
 {
-    public const int MIN_LENGTH = 3;
+    private static readonly Regex _identifierRegex = new("^[a-zA-Z]+$", RegexOptions.Compiled);
 
-    public const int MAX_LENGTH = 150;
+    public const int IDENTIFIER_MIN_LENGTH = 3;
+    public const int IDENTIFIER_MAX_LENGTH = 150;
 
     public string Value { get; }
 
@@ -25,12 +27,12 @@ public record Identifier
             errors.Add(GeneralErrors.ValueIsRequired("Идентификатор"));
         }
 
-        if (!value.All(c => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+        if (!_identifierRegex.IsMatch(value))
         {
             errors.Add(GeneralErrors.ValueIsInvalid("Идентификатор"));
         }
 
-        if (value.Length <= MIN_LENGTH || value.Length >= MAX_LENGTH)
+        if (value.Length is < IDENTIFIER_MIN_LENGTH or > IDENTIFIER_MAX_LENGTH)
         {
             errors.Add(GeneralErrors.ValueIsInvalid("Идентификатор"));
         }

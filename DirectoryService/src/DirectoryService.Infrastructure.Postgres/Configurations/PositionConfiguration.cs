@@ -14,30 +14,43 @@ public class PositionConfiguration : IEntityTypeConfiguration<Position>
             .HasName("pk_positions");
 
         builder.Property(x => x.Id)
-            .HasColumnName("position_id");
+            .IsRequired()
+            .HasColumnName("position_id")
+            .HasConversion(
+                value => value.Value,
+                value => new PositionId(value));
 
-        builder.Property(x => x.Name)
-            .HasMaxLength(150)
-            .HasColumnName("name")
-            .IsRequired();
+        builder.ComplexProperty(x => x.Name, nb =>
+        {
+            nb.Property(n => n.Value)
+                .HasColumnName("name")
+                .HasMaxLength(PositionName.NAME_MAX_LENGTH)
+                .IsRequired();
+        });
 
         builder.Property(x => x.Description)
             .IsRequired(false)
-            .HasColumnName("description");
+            .HasColumnName("description")
+            .HasMaxLength(Description.DESCRIPTION_MAX_LENGTH)
+            .HasConversion(
+                value => value!.Value,
+                value => new Description(value));
 
         builder.Property(x => x.IsActive)
-            .HasDefaultValue(true)
-            .HasColumnName("is_active")
-            .IsRequired();
+            .IsRequired()
+            .HasColumnName("is_active");
 
         builder.Property(x => x.CreatedAt)
-            .HasDefaultValueSql("now()")
-            .HasColumnName("created_at")
-            .IsRequired();
+            .IsRequired()
+            .HasColumnName("created_at");
 
         builder.Property(x => x.UpdatedAt)
-            .HasDefaultValueSql("now()")
-            .HasColumnName("updated_at")
-            .IsRequired();
+            .IsRequired()
+            .HasColumnName("updated_at");
+
+        builder.HasMany(x => x.DepartmentPositions)
+            .WithOne()
+            .HasForeignKey(x => x.PositionId)
+            .HasConstraintName("fk_positions_departments");
     }
 }
