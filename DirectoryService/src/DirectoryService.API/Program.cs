@@ -1,55 +1,42 @@
-using DirectoryService.Application;
-using DirectoryService.Application.Locations;
-using DirectoryService.Infrastructure.Postgres;
-using DirectoryService.Infrastructure.Postgres.Locations;
-using DirectoryService.Presentation.Envelopes;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
-using SharedKernel;
+using System.Globalization;
+using DirectoryService.Presentation;
+using DirectoryService.Presentation.Middlewares;
+using Serilog;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
+    .CreateBootstrapLogger();
 
-builder.Services.AddControllers();
-
-builder.Services.Configure<ApiBehaviorOptions>(options =>
+try
 {
-    options.SuppressModelStateInvalidFilter = true;
-});
+    Log.Information("Starting web Application <<DirectoryService>>");
 
-builder.Services.AddOpenApi(options =>
-{
-    options.AddSchemaTransformer((schema, context, _) =>
+    WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+    builder.Services.AddConfiguration(builder.Configuration);
+
+    WebApplication app = builder.Build();
+
+    app.UseExceptionMiddleware();
+
+    app.UseSerilogRequestLogging();
+
+    if (app.Environment.IsDevelopment())
     {
-        if (context.JsonTypeInfo.Type == typeof(Envelope<Errors>))
-        {
-            if (schema.Properties.TryGetValue("errors", out var errorsProp))
-            {
-                errorsProp.Items.Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.Schema,
-                    Id = "Error",
-                };
-            }
-        }
+        app.MapOpenApi();
+        app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "DirectoryService API"));
+    }
 
-        return Task.CompletedTask;
-    });
-});
+    app.MapControllers();
 
-builder.Services.AddInfrastructurePostgres(builder.Configuration);
-
-builder.Services.AddScoped<ILocationsRepository, LocationsRepository>();
-
-builder.Services.AddApplication();
-
-WebApplication app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "DirectoryService API"));
+    app.Run();
 }
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application <<DirectoryService>> terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

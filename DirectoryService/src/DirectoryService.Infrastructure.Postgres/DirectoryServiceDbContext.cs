@@ -1,5 +1,4 @@
-﻿using DirectoryService.Application.Locations;
-using DirectoryService.Domain.Locations;
+﻿using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 
 namespace DirectoryService.Infrastructure.Postgres;
