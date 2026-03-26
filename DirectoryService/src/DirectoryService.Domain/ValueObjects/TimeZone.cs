@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using SharedKernel;
 
 namespace DirectoryService.Domain.ValueObjects;
 
@@ -11,10 +12,25 @@ public record TimeZone
         Value = value;
     }
 
-    public static Result<TimeZone> Create(string value)
+    public static Result<TimeZone, Errors> Create(string value)
     {
-        return string.IsNullOrWhiteSpace(value) ?
-            Result.Failure<TimeZone>("Временая зона невалидная") :
-            new TimeZone(value);
+        List<Error> errors = [];
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            errors.Add(GeneralErrors.ValueIsRequired("Часовой пояс"));
+        }
+
+        if (!TimeZoneInfo.GetSystemTimeZones().Any(z => z.Id != value))
+        {
+            errors.Add(GeneralErrors.ValueIsInvalid("Часовой пояс"));
+        }
+
+        if (errors.Count > 0)
+        {
+            return new Errors(errors);
+        }
+
+        return new TimeZone(value);
     }
 }
