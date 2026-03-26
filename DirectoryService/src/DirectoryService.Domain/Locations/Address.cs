@@ -1,9 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
 using SharedKernel;
 
-namespace DirectoryService.Domain.ValueObjects;
+namespace DirectoryService.Domain.Locations;
 
-public record Address
+public sealed record Address
 {
     public string Country { get; }
 

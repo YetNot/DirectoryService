@@ -1,9 +1,9 @@
 ﻿using CSharpFunctionalExtensions;
 using SharedKernel;
 
-namespace DirectoryService.Domain.ValueObjects;
+namespace DirectoryService.Domain.Locations;
 
-public record TimeZone
+public sealed record TimeZone
 {
     public string Value { get; }
 

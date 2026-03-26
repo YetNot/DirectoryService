@@ -1,9 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.Abstractions;
 using DirectoryService.Domain.Locations;
-using DirectoryService.Domain.ValueObjects;
 using SharedKernel;
-using TimeZone = DirectoryService.Domain.ValueObjects.TimeZone;
+using TimeZone = DirectoryService.Domain.Locations.TimeZone;
 
 namespace DirectoryService.Application.Locations.CreateLocation;
 
@@ -20,7 +19,7 @@ public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand
         CreateLocationCommand command,
         CancellationToken cancellationToken)
     {
-        Result<NameLocation, Errors> nameResult = NameLocation.Create(command.Request.Name);
+        Result<LocationName, Errors> nameResult = LocationName.Create(command.Request.Name);
         if (nameResult.IsFailure)
         {
             return nameResult.Error;
@@ -42,7 +41,7 @@ public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand
             return timeZoneResult.Error;
         }
 
-        var location = new Location(nameResult.Value, addressResult.Value, timeZoneResult.Value);
+        Location? location = Location.Create(nameResult.Value, addressResult.Value, timeZoneResult.Value);
 
         Result<Guid, Error> result = await _locationsRepository.AddAsync(location,  cancellationToken);
         if (result.IsFailure)
@@ -50,6 +49,6 @@ public class CreateLocationHandler : ICommandHandler<Guid, CreateLocationCommand
             return result.Error.ToErrors();
         }
 
-        return location.Id;
+        return location.Id.Value;
     }
 }

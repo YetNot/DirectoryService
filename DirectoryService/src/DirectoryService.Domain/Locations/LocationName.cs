@@ -1,22 +1,22 @@
 ﻿using CSharpFunctionalExtensions;
 using SharedKernel;
 
-namespace DirectoryService.Domain.ValueObjects;
+namespace DirectoryService.Domain.Locations;
 
-public record NameLocation
+public sealed record LocationName
 {
-    public const int MIN_LENGTH = 3;
+    public const int LOCATION_MIN_LENGTH = 3;
 
-    public const int MAX_LENGTH = 120;
+    public const int LOCATION_MAX_LENGTH = 120;
 
     public string Value { get; }
 
-    private NameLocation(string value)
+    private LocationName(string value)
     {
         Value = value;
     }
 
-    public static Result<NameLocation, Errors> Create(string value)
+    public static Result<LocationName, Errors> Create(string value)
     {
         List<Error> errors = [];
 
@@ -25,7 +25,7 @@ public record NameLocation
             errors.Add(GeneralErrors.ValueIsRequired("Название локации"));
         }
 
-        if (value.Length <= MIN_LENGTH || value.Length >= MAX_LENGTH)
+        if (value.Length is < LOCATION_MIN_LENGTH or > LOCATION_MAX_LENGTH)
         {
             errors.Add(GeneralErrors.ValueIsInvalid("Название локации"));
         }
@@ -35,6 +35,6 @@ public record NameLocation
             return new Errors(errors);
         }
 
-        return new NameLocation(value);
+        return new LocationName(value);
     }
 }

@@ -1,4 +1,5 @@
-﻿using DirectoryService.Domain.Departments;
+﻿using DirectoryService.Domain.DepartmentPositions;
+using DirectoryService.Domain.Departments;
 using DirectoryService.Domain.Positions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -11,36 +12,28 @@ public class DepartmentPositionConfiguration : IEntityTypeConfiguration<Departme
     {
         builder.ToTable("department_positions");
 
-        builder.HasKey(x => x.DepartmentPositionId)
+        builder.HasKey(x => x.Id)
             .HasName("pk_department_positions");
 
-        builder.Property(x => x.DepartmentPositionId)
-            .HasColumnName("department_position_id");
+        builder.Property(x => x.Id)
+            .IsRequired()
+            .HasColumnName("department_position_id")
+            .HasConversion(
+                value => value.Value,
+                value => new DepartmentPositionId(value));
 
         builder.Property(x => x.DepartmentId)
-            .HasColumnName("department_id");
+            .IsRequired()
+            .HasColumnName("department_id")
+            .HasConversion(
+                value => value.Value,
+                value => new DepartmentId(value));
 
         builder.Property(x => x.PositionId)
-            .HasColumnName("position_id");
-
-        builder
-            .HasOne<Department>()
-            .WithMany(p => p.DepartmentPositions)
-            .HasForeignKey(d => d.DepartmentId)
-            .HasConstraintName("fk_department_positions_departments")
             .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder
-            .HasOne<Position>()
-            .WithMany(p => p.DepartmentPositions)
-            .HasForeignKey(d => d.PositionId)
-            .HasConstraintName("fk_department_positions_positions")
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasIndex(x => new { x.PositionId, x.DepartmentId })
-            .IsUnique()
-            .HasDatabaseName("ux_department_positions_position_id_department_id");
+            .HasColumnName("position_id")
+            .HasConversion(
+                value => value.Value,
+                value => new PositionId(value));
     }
 }
