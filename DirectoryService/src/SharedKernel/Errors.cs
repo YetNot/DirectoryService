@@ -6,9 +6,9 @@ public class Errors : IEnumerable<Error>
 {
     private readonly List<Error> _errors;
 
-    public Errors(IEnumerable<Error> errors)
+    public Errors(IEnumerable<Error>? errors)
     {
-        _errors = [..errors];
+        _errors = errors?.ToList() ?? [];
     }
 
     public static implicit operator Errors(List<Error> errors) => new(errors);
