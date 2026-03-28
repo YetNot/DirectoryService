@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using DirectoryService.Application.Abstractions;
-using DirectoryService.Application.Locations.CreateLocation;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DirectoryService.Application;
@@ -10,6 +10,8 @@ public static class DependencyInjectionExtensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         Assembly assembly = typeof(DependencyInjectionExtensions).Assembly;
+
+        services.AddValidatorsFromAssembly(assembly);
 
         services.Scan(scan => scan.FromAssemblies([assembly])
             .AddClasses(classes => classes

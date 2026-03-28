@@ -1,7 +1,6 @@
 ﻿using DirectoryService.Domain.Locations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TimeZone = DirectoryService.Domain.Locations.TimeZone;
 
 namespace DirectoryService.Infrastructure.Postgres.Configurations;
 
@@ -21,15 +20,19 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
                 value => value.Value,
                 value => new LocationId(value));
 
-        builder.ComplexProperty(x => x.Name, nb =>
+        builder.OwnsOne(x => x.Name, nb =>
         {
-            nb.Property(n => n.Value)
+            nb.Property(x => x.Value)
                 .HasColumnName("name")
                 .HasMaxLength(LocationName.LOCATION_MAX_LENGTH)
                 .IsRequired();
+
+            nb.HasIndex(x => x.Value)
+                .IsUnique()
+                .HasDatabaseName("ux_locations_name");
         });
 
-        builder.ComplexProperty(x => x.Address, nb =>
+        builder.OwnsOne(x => x.Address, nb =>
         {
             nb.Property(x => x.Country)
                 .HasColumnName("country")
@@ -46,6 +49,16 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
             nb.Property(x => x.HouseNumber)
                 .HasColumnName("house_number")
                 .IsRequired();
+
+            nb.HasIndex(x => new
+                {
+                    x.Country,
+                    x.City,
+                    x.Street,
+                    x.HouseNumber
+                })
+                .IsUnique()
+                .HasDatabaseName("ux_locations_address");
         });
 
         builder.ComplexProperty(x => x.TimeZone, nb =>

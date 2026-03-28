@@ -32,22 +32,22 @@ public class ExceptionMiddleware
     {
         _logger.LogError(exception, "Exception was thrown in DirectoryService");
 
-        (int statusCode, Error[]? errors) = exception switch
+        (int statusCode, Error[] errors) = exception switch
         {
             BadRequestException => (
-                StatusCodes.Status400BadRequest, JsonSerializer.Deserialize<Error[]>(exception.Message)),
+                StatusCodes.Status400BadRequest, JsonSerializer.Deserialize<Error[]>(exception.Message) ?? []),
 
             ConflictException => (
-                StatusCodes.Status409Conflict, JsonSerializer.Deserialize<Error[]>(exception.Message)),
+                StatusCodes.Status409Conflict, JsonSerializer.Deserialize<Error[]>(exception.Message) ?? []),
 
             FailureException => (
-                StatusCodes.Status500InternalServerError, JsonSerializer.Deserialize<Error[]>(exception.Message)),
+                StatusCodes.Status500InternalServerError, JsonSerializer.Deserialize<Error[]>(exception.Message) ?? []),
 
             NotFoundException => (
-                StatusCodes.Status404NotFound, JsonSerializer.Deserialize<Error[]>(exception.Message)),
+                StatusCodes.Status404NotFound, JsonSerializer.Deserialize<Error[]>(exception.Message) ?? []),
 
             ValidationException => (
-                StatusCodes.Status400BadRequest, JsonSerializer.Deserialize<Error[]>(exception.Message)),
+                StatusCodes.Status400BadRequest, JsonSerializer.Deserialize<Error[]>(exception.Message) ?? []),
 
             _ => (StatusCodes.Status500InternalServerError, [Error.Failure("server.internal", "Something went wrong")])
         };
