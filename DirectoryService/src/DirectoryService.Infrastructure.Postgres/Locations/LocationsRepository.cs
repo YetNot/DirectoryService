@@ -1,7 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
 using DirectoryService.Application.Locations;
 using DirectoryService.Domain.Locations;
+using DirectoryService.Domain.Shared;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using SharedKernel;
 
 namespace DirectoryService.Infrastructure.Postgres.Locations;
@@ -27,11 +30,45 @@ public class LocationsRepository : ILocationsRepository
 
             return Result.Success<Guid, Error>(location.Id.Value);
         }
-        catch (Exception)
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx)
         {
-            _logger.LogError("Location not saved with {LocationId}",  location.Id.Value);
+            if (pgEx.SqlState == PostgresErrorCodes.UniqueViolation)
+            {
+                if (pgEx.ConstraintName == "ux_locations_name")
+                {
+                    return DirectoryError.NameLocationConflict();
+                }
 
-            return Result.Failure<Guid, Error>(GeneralErrors.Failure());
+                if (pgEx.ConstraintName == "ux_locations_address")
+                {
+                    return DirectoryError.AddressLocationConflict();
+                }
+            }
+
+            _logger.LogError(
+                ex,
+                "Database update error while saving location with id {LocationId}",
+                location.Id.Value);
+
+            return DirectoryError.DatabaseError();
+        }
+        catch (OperationCanceledException ex)
+        {
+            _logger.LogError(
+                ex,
+                "Operation was cancelled while creating the location with id {LocationId}",
+                location.Id.Value);
+
+            return DirectoryError.OperationCancelled();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Location not saved with id {LocationId}",
+                location.Id.Value);
+
+            return DirectoryError.DatabaseError();
         }
     }
 }

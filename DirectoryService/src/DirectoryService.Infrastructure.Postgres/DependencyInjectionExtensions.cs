@@ -12,6 +12,8 @@ public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddInfrastructurePostgres(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<ILocationsRepository, LocationsRepository>();
+
         services.AddDbContext<DirectoryServiceDbContext>((sp, options) =>
         {
             string? connectionString = configuration.GetConnectionString(Constants.DATABASE);
@@ -28,8 +30,6 @@ public static class DependencyInjectionExtensions
 
             options.UseLoggerFactory(loggerFactory);
         });
-
-        services.AddScoped<ILocationsRepository, LocationsRepository>();
 
         return services;
     }
